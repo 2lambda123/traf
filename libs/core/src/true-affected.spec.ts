@@ -205,6 +205,46 @@ describe('trueAffected', () => {
     expect(affected).toEqual([]);
   });
 
+  it('should find files that are related to changed files which are not in projects files', async () => {
+    jest.spyOn(git, 'getChangedFiles').mockReturnValue([
+      {
+        filePath: 'angular-component/component.html',
+        changedLines: [6],
+      },
+    ]);
+
+    const affected = await trueAffected({
+      cwd,
+      base: 'main',
+      rootTsConfig: 'tsconfig.json',
+      projects: [
+        {
+          name: 'angular-component',
+          sourceRoot: 'angular-component/',
+          tsConfig: 'angular-component/tsconfig.json',
+        },
+        {
+          name: 'proj1',
+          sourceRoot: 'proj1/',
+          tsConfig: 'proj1/tsconfig.json',
+        },
+        {
+          name: 'proj2',
+          sourceRoot: 'proj2/',
+          tsConfig: 'proj2/tsconfig.json',
+        },
+        {
+          name: 'proj3',
+          sourceRoot: 'proj3/',
+          tsConfig: 'proj3/tsconfig.json',
+          implicitDependencies: ['proj1'],
+        },
+      ],
+    });
+
+    expect(affected).toEqual(['angular-component']);
+  });
+
   it("should ignore files when can't find the changed line", async () => {
     jest.spyOn(git, 'getChangedFiles').mockReturnValue([
       {

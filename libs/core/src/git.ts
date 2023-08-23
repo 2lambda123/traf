@@ -60,7 +60,7 @@ export function getDiff({ base, cwd }: BaseGitActionArgs): string {
   }
 }
 
-interface GetChangedFiles {
+export interface GetChangedFiles {
   filePath: string;
   changedLines: number[];
 }

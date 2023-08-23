@@ -1,7 +1,8 @@
 import { existsSync } from 'fs';
-import { join, resolve } from 'path';
+import { basename, dirname, join, relative, resolve } from 'path';
 import { Project, Node, ts, SyntaxKind } from 'ts-morph';
-import { getChangedFiles } from './git';
+import { fastFindInFiles, FastFindInFiles } from 'fast-find-in-files';
+import { GetChangedFiles, getChangedFiles } from './git';
 
 export interface TrueAffectedProject {
   name: string;
@@ -89,9 +90,76 @@ export const trueAffected = async ({
     }
   );
 
-  const changedFiles = getChangedFiles({ base, cwd }).filter(
+  const sourceChangedFiles: GetChangedFiles[] = getChangedFiles({
+    base,
+    cwd,
+  }).filter(
     ({ filePath }) => project.getSourceFile(resolve(cwd, filePath)) != null
   );
+
+  const nonSourceChangedFiles: GetChangedFiles[] = getChangedFiles({
+    base,
+    cwd,
+  })
+    .filter(
+      ({ filePath }) =>
+        !filePath.match(/.*\.(ts|js)x?$/g) &&
+        project.getSourceFile(resolve(cwd, filePath)) == null
+    )
+    .flatMap(({ filePath: changedFilePath }) => {
+      const fileName = basename(changedFilePath);
+
+      let files: FastFindInFiles[] = [];
+
+      // need to skip node_modules & fastFindInFiles doesn't support globs/exclude
+      const appsPath = join(cwd, 'apps');
+      const libsPath = join(cwd, 'libs');
+
+      const appsExists = existsSync(appsPath);
+      const libsExists = existsSync(libsPath);
+      if (appsExists || libsExists) {
+        if (appsExists) files = fastFindInFiles(appsPath, fileName);
+        if (libsExists)
+          files = [...files, ...fastFindInFiles(libsPath, fileName)];
+      } else {
+        files = fastFindInFiles(cwd, fileName);
+      }
+
+      console.log(files);
+
+      // regex to find string references to the file name
+      const regExp = new RegExp(`['"\`](?<relFilePath>.*${fileName})['"\`]`);
+
+      const relevantFiles = files
+        .map(({ filePath: foundFilePath, queryHits }) => ({
+          filePath: relative(cwd, foundFilePath),
+          changedLines: queryHits
+            .filter(({ line }) => {
+              const match = regExp.exec(line);
+              const { relFilePath } = match?.groups ?? {};
+
+              if (relFilePath == null) return false;
+
+              const foundFileDir = resolve(dirname(foundFilePath));
+              const changedFileDir = resolve(cwd, dirname(changedFilePath));
+
+              const relatedFilePath = resolve(
+                cwd,
+                relative(cwd, join(dirname(foundFilePath), relFilePath))
+              );
+
+              return (
+                foundFileDir === changedFileDir && existsSync(relatedFilePath)
+              );
+            })
+            .map(({ lineNumber }) => lineNumber),
+        }))
+        .filter(({ changedLines }) => changedLines.length > 0);
+
+      return relevantFiles;
+    });
+
+  const changedFiles = [...sourceChangedFiles, ...nonSourceChangedFiles];
 
   const affectedPackages = new Set<string>();
   const visitedIdentifiers = new Map<string, string[]>();
