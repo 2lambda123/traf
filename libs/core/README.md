@@ -26,6 +26,7 @@ npm install @traf/core
 import { trueAffected } from '@traf/core';
 
 const affected = await trueAffected({
+  base: 'origin/main',
   rootTsConfig: 'tsconfig.base.json',
   projects: [
     {
