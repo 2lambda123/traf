@@ -23,7 +23,7 @@ npm install @traf/core
 ### **Usage**
 
 ```ts
-import { trueAffected } = from '@traf/core';
+import { trueAffected } from '@traf/core';
 
 const affected = await trueAffected({
   rootTsConfig: 'tsconfig.base.json',
@@ -48,15 +48,15 @@ const affected = await trueAffected({
 | `base`         | `string`    | The base branch to compare against                           | `origin/main` |
 | `includeFiles` | `string[]`  | Glob patterns to include (relative to projects' source root) |               |
 
-> `rootTsConfig` - The path to the root tsconfig file, should include the `paths` prop with all projects mapping so `ts-morph` can find the references.
+> `rootTsConfig` - The path to the root tsconfig file. This file should contain the configuration for the entire monorepo, including the `paths` property that maps all projects, allowing `ts-morph` to find the references.
 
 ### **Project**
 
 | Option                 | Type       | Description                                                       |
 | ---------------------- | ---------- | ----------------------------------------------------------------- |
-| `name`                 | `string`   | The project name                                                  |
-| `sourceRoot`           | `string`   | The project source root                                           |
-| `tsConfig`             | `string`   | The project tsconfig file (should only include the project files) |
+| `name`                 | `string`   | The unique name of the project within the monorepo                                                  |
+| `sourceRoot`           | `string`   | The root directory of the project's source files                                           |
+| `tsConfig`             | `string`   | The path to the project's tsconfig file, which should only include the files relevant to the project|
 | `implicitDependencies` | `string[]` | An array of implicit dependencies                                 |
 
 ### How it works?
