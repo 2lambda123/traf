@@ -67,4 +67,6 @@ The algorithm is based on the following steps:
 1. Using git to find all changed lines in the current branch.
 2. Using [ts-morph](https://ts-morph.com/) to find the changed element (function, class, const etc..) per line.
 3. Using ts-morph [findReferences](https://ts-morph.com/navigation/finding-references#finding-referencing-nodes) to find all references to the changed element recursively.
-4. For each reference, find the project that contains the reference and add it to the affected projects list.
+4. For each reference found by `ts-morph`:
+   a. Find the project that contains the reference.
+   b. Add the project to the list of affected projects.
