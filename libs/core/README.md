@@ -47,7 +47,7 @@ const affected = await trueAffected({
 | `projects`     | `Project[]` | An array of projects to check                                |               |
 | `cwd`          | `string`    | The current working directory                                |               |
 | `base`         | `string`    | The base branch to compare against                           | `origin/main` |
-| `includeFiles` | `string[]`  | Glob patterns to include (relative to projects' source root) |               |
+| `includeFiles` | `string[]`  | File names to include that are not part of `tsconfig` |               |
 
 > `rootTsConfig` - The path to the root tsconfig file. This file should contain the configuration for the entire monorepo, including the `paths` property that maps all projects, allowing `ts-morph` to find the references.
 
