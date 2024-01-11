@@ -55,7 +55,7 @@ const affected = await trueAffected({
 
 | Option                 | Type       | Description                                                       |
 | ---------------------- | ---------- | ----------------------------------------------------------------- |
-| `name`                 | `string`   | The unique name of the project within the monorepo                                                  |
+| `name`                 | `string`   | The project name                                                  |
 | `sourceRoot`           | `string`   | The root directory of the project's source files                                           |
 | `tsConfig`             | `string`   | The path to the project's tsconfig file, which should only include the files relevant to the project|
 | `implicitDependencies` | `string[]` | An array of implicit dependencies                                 |
